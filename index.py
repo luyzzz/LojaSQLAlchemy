@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker, declarative_base
 from colorama import Fore, Style, init
 
-# Inicializar colorama
+
 init(autoreset=True)
 
 Base = declarative_base()
@@ -72,14 +72,14 @@ def fazer_pedido(session, cliente_id, produto_id, quantidade):
         session.commit()
         print(Fore.GREEN + f"Pedido realizado com sucesso. Valor total: R$ {total:.2f}")
 
-        # Atualizar o valor total do cliente após o pedido
+       
         calcular_valor_total(session, cliente_id)
     else:
         print("Estoque insuficiente para realizar o pedido.")
 
 
 def calcular_valor_total(session, cliente_id):
-    # Calcular o valor total dos pedidos do cliente
+  
     total = session.query(func.sum(Pedido.quantidade * Produto.preco)). \
         join(Produto, Pedido.produto_id == Produto.id). \
         filter(Pedido.cliente_id == cliente_id).scalar()
@@ -87,7 +87,7 @@ def calcular_valor_total(session, cliente_id):
     if total is None:
         total = 0.0
 
-    # Adicionar ou atualizar a entrada em CompraTotalizada
+   
     compra = session.query(CompraTotalizada).filter_by(cliente_id=cliente_id).first()
     if compra:
         compra.valor_total = total
@@ -143,17 +143,17 @@ def tirar_pedido(session, cliente_id):
         quantidade_para_remover = int(input("Digite a quantidade que deseja remover: "))
 
         if quantidade_para_remover >= pedido.quantidade:
-            produto.estoque += pedido.quantidade  # Devolve o estoque total do pedido
-            session.delete(pedido)  # Remove o pedido completamente
+            produto.estoque += pedido.quantidade  
+            session.delete(pedido) 
             session.commit()
             print(Fore.GREEN + "Pedido removido com sucesso.")
         else:
             pedido.quantidade -= quantidade_para_remover
-            produto.estoque += quantidade_para_remover  # Devolve apenas a quantidade ajustada ao estoque
+            produto.estoque += quantidade_para_remover  
             session.commit()
             print(f"Pedido ajustado. Nova quantidade: {pedido.quantidade}")
 
-        # Atualizar o valor total do cliente após ajuste ou remoção de pedido
+        
         calcular_valor_total(session, cliente_id)
     else:
         print("Pedido não encontrado.")
@@ -188,13 +188,13 @@ def interface_compra(session):
             break
 
 
-# Configuração do banco de dados e sessão
+
 engine = create_engine('sqlite:///loja.db')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# Adicionando exemplos de clientes e produtos
+
 if not session.query(Cliente).first():
     adicionar_cliente(session, 'João Silva', 'joao.silva@example.com')
     adicionar_cliente(session, 'Maria Oliveira', 'maria.oliveira@example.com')
@@ -204,5 +204,5 @@ if not session.query(Produto).first():
     adicionar_produto(session, 'Smartphone', 1500.0, 20)
     adicionar_produto(session, 'Teclado', 150.0, 50)
 
-# Interface de compra
+
 interface_compra(session)
